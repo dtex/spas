@@ -95,14 +95,15 @@ var bundles = {},
 if (nconf.get('service')) {
 
 	// Specify output and error log files
-	fs.exists('./logs', function (exists) {
-		if(!(exists)) fs.mkdirSync('./logs');
-	});
-	var	out = fs.openSync('./logs/spasout.log', 'a'),
-		err = fs.openSync('./logs/spaserr.log', 'a');
+	if (!fs.existsSync(process.cwd() + '/logs')) {
+		fs.mkdirSync(process.cwd() + '/logs');
+	}
+	
+	var	out = fs.openSync(process.cwd() + '/logs/spasout.log', 'a'),
+		err = fs.openSync(process.cwd() + '/logs/spaserr.log', 'a');
 
 	// Spawn the main SPAS process
-	var params = ['spas'];
+	var params = [];
 	if (nconf.get('dev')) params.push('--dev');
 	if (nconf.get('sample')) params.push('--sample');
 	if (nconf.get('log')) {
@@ -110,7 +111,7 @@ if (nconf.get('service')) {
 		params.push(nconf.get('log'));
 	}
 
-	var spasService = spawn('node', params, { detached: true, stdio: [ 'ignore', out, err ] });
+	var spasService = spawn('spas', params, { detached: true, stdio: [ 'ignore', out, err ] });
 
 	spasService.unref();
 
@@ -124,20 +125,31 @@ if (nconf.get('service')) {
 		// These are the return routes for authentication services
 		'/oauth': {
 			get: function() {
-				var nonce = querystring.parse((url.parse(this.req.url).query)).oauth_nonce,
-					nonceArray = nonce.split(","),
+				var nonce = querystring.parse((url.parse(this.req.url).query)).oauth_nonce;
+				
+				if (!_.isUndefined(nonce)) {
+					
+					var nonceArray = nonce.split(","),
 					bid = nonceArray[0],
 					key = nonceArray[1],
 					self = this;
 
-				oauth.saveOauthToken( bundles[bid][key], querystring.parse((url.parse(this.req.url).query)).oauth_nonce, querystring.parse((url.parse(this.req.url).query)).oauth_token, function( tout ) {
-
-					if (_.has(tout, 'redirect')) {
-						self.res.statusCode = 302;
-						self.res.setHeader("Location", tout.redirect);
-						self.res.end();
-					}
-				});
+					oauth.saveOauthToken( bundles[bid][key], querystring.parse((url.parse(this.req.url).query)).oauth_nonce, querystring.parse((url.parse(this.req.url).query)).oauth_token, function( tout ) {
+	
+						if (_.has(tout, 'redirect')) {
+							self.res.statusCode = 302;
+							self.res.setHeader("Location", tout.redirect);
+							self.res.end();
+						}
+					
+					});
+				} else {
+					
+					this.res.writeHead(404);
+					this.res.end();
+		
+				}
+				
 			}
 		},
 
@@ -162,10 +174,37 @@ if (nconf.get('service')) {
 		'/bundle/:bid': {
 	    	get: function(bid) {
 	    		var gzip = false;
+	    		winston.error('Old style bundle request made for ' + bid);
 	    		if (_.has(this.req.headers, "accept-encoding")) {
 	    			if  (this.req.headers["accept-encoding"].match(/\bgzip\b/)) {
 	    				gzip = true;
 	    			}
+	    		}
+	    		engine.fulfill ( this.res, this.req.headers['x-forwarded-for'] || this.req.connection.remoteAddress, bid, bundles[bid], querystring.parse((url.parse(this.req.url).query)).callback, gzip );
+	    	}
+		},
+		
+		// A bundle is being requested
+		'/:bid': {
+	    	get: function(bid) {
+	    		var gzip = false;
+	    		winston.error('Old style bundle request made for ' + bid);
+	    		if (_.has(this.req.headers, "accept-encoding")) {
+	    			if  (this.req.headers["accept-encoding"].match(/\bgzip\b/)) {
+	    				gzip = true;
+	    			}
+	    		}
+	    		engine.fulfill ( this.res, this.req.headers['x-forwarded-for'] || this.req.connection.remoteAddress, bid, bundles[bid], querystring.parse((url.parse(this.req.url).query)).callback, gzip );
+	    	}
+		},
+
+		// A bundle is being requested
+		'/': {
+	    	get: function() {
+	    		var gzip = false;
+	    			bid = this.req.headers.host.split('.')[0];
+	    		if (_.has(this.req.headers, "accept-encoding") && this.req.headers["accept-encoding"].match(/\bgzip\b/)) {
+	    				gzip = true;
 	    		}
 	    		engine.fulfill ( this.res, this.req.headers['x-forwarded-for'] || this.req.connection.remoteAddress, bid, bundles[bid], querystring.parse((url.parse(this.req.url).query)).callback, gzip );
 	    	}
