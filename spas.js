@@ -188,7 +188,7 @@ if (nconf.get('service')) {
 		'/:bid': {
 	    	get: function(bid) {
 	    		var gzip = false;
-	    		winston.error('Old style bundle request made for ' + bid);
+	    		winston.error('Future style bundle request made for ' + bid);
 	    		if (_.has(this.req.headers, "accept-encoding")) {
 	    			if  (this.req.headers["accept-encoding"].match(/\bgzip\b/)) {
 	    				gzip = true;
