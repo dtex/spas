@@ -202,10 +202,16 @@ if (nconf.get('service')) {
 		'/': {
 	    	get: function() {
 	    		var gzip = false;
-	    			bid = this.req.headers.host.split('.')[0];
+                if (_.has(this.req.headers, 'host')) {
+                        bid = this.req.headers.host.split('.')[0];
+                } else {
+                        bid = '';
+                }
+
 	    		if (_.has(this.req.headers, "accept-encoding") && this.req.headers["accept-encoding"].match(/\bgzip\b/)) {
 	    				gzip = true;
 	    		}
+	    		
 	    		engine.fulfill ( this.res, this.req.headers['x-forwarded-for'] || this.req.connection.remoteAddress, bid, bundles[bid], querystring.parse((url.parse(this.req.url).query)).callback, gzip );
 	    	}
 		}
