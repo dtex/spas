@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="little-spas : Super Proxy Asset Server" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>little-spas | Build Your Bundle</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/dtex/little-spas">View on GitHub</a>
+
+          <h1 id="project_title">little-spas</h1>
+          <h2 id="project_tagline">Open Sourced Super Proxy Asset Server</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/dtex/little-spas/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/dtex/little-spas/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+	       <navigation>
+			<ul>
+				<li><a href="installation.html">Install and Configure</a></li>
+				<li><a class="active" href="buildIt.html">Build Your Bundle</a></li>
+				<li><a href="useIt.html">Use Your Bundle</a></li>
+				<li><a href="tips.html">Tips and Tricks</a></li>
+			</ul>			
+			<div class="clear" />
+		</navigation> <h3>Build Your Bundle</h3>
+<p>A bundle is a group of API requests that you want combined into a single response. Generally you will have a bundle for each website you build, but you may choose to have bundles that are only called from certain pages. Since little-spas responses can be highly optimized, I prefer to bundle everything together and minimize the number of requests made by the client even I don't need one particular API all the time.</p>
+<p>Bundles are defined in js files at the root of your project directory. Here is the sample.js bundle that is included when you create a little-spas project:
+<code><pre>var spashttp = require("spas-http");
+
+exports.sample = {
+	"searchTweets": {
+		"resource": spashttp.request,
+		"params": {
+			"url": "http://search.twitter.com/search.json",
+			"q": "dtex",
+			"lang": "en",
+			"count": 100 
+		},
+		"cacheduration": 3600,
+		"timeout": 500,
+		"filter": {
+			"results": [{
+				"from_user": true,
+				"text": true }]
+		}
+	},
+	"searchMoreTweets": {
+		"resource": spashttp.request,
+		"params": {
+			"url": "http://search.twitter.com/search.json",
+			"q":"little-spas",
+			"lang": "en" 
+		},
+		"cacheduration": 3600
+	}
+};</pre></code></p>
+
+<p>The module we are requiring is a SPAS request module. spas-http is maintained in a <a href="https://github.com/dtex/spas-http">separate repository</a> and will handle most basic json requests. spas-simple documentation can be found at <a href="http://dtex.github.com/spas-http">http://dtex.github.com/spas-http</a></p>
+<p>Each bundle is an object subordinate to your <a href="http://nodejs.org/api/modules.html#modules_module_exports" target="_blank">exports object</a>. The bundle name should be unique otherwise your bundles will collide in Redis. The bundle's immediate children are API request objects. We have two in our sample, "searchTweets" and "searchMoreTweets".</p>
+<strong>resource:</strong> (object and method, required) &mdash; The method you wish to use to retrieve your data.<br/>
+<strong>params:</strong> (object, required) &mdash; Parameters object that is passed to the data retrieval method<br/>
+<strong>cacheduration:</strong> (seconds, optional, default: 3600) &mdash; Controls how long a request to an API will be cached by little-spas.<br/> 
+<strong>schedule:</strong> (string, optional) &mdash; In addition to building bundles on demand, little-spas can refresh bundles on a scheduled basis. The schedule string is a <a href="http://www.nncron.ru/help/EN/working/cron-format.htm">Cron formatted</a> string. Be mindful of rate limiting imposed by various providers when setting this up.<br/>
+<strong>timeout:</strong> (milliseconds, optional, default: none) &mdash; Controls how long little-spas will wait for a request to an API before serving up the cached version.<br/>
+<strong>filter:</strong> (optional, default: none) &mdash; A map of the results object showing just the parts you want to keep.</br>
+<strong>cleanup:</strong> (optional, default: none) &mdash; A function that accepts one parameter (your filtered api response as json) and returns the same object. You can perform any manipulation you please on the API response before returning it.</p>
+
+<h5>More on the resource parameter</h5>
+<p>In this case we are using the "request" method in the "simple" API description. simple["request"] is, as its name implies, a straightforward request to a public API. Most API's that do not require authentication, session management, recursive requests or custom transforms can be accessed via this basic method. More information about this API description and method can be found at <a href="http://dtex.github.com/spas-simple">http://dtex.github.com/spas-simple</a></p>
+
+<h5>More on the params parameter</h5>
+<p>The structure of the params object is dependent on the API description you are utilizing. Most basic requests' params objects will consist of a url and a collection of key/value pairs to be passed as parameters in the query string in the request to the API.</p>
+
+<h5>More on the cachedurataion parameter</h5>
+<p>In the event that an API cannot be reached or is taking too long to respond, the cache will continue to be used until it can be refreshed.</p>
+
+<h5>More on the timeout parameter</h5>
+<p> By default there is no timeout, so in the event that the API server does not properly close the connection you will never get a response from little-spas (not good). In the event that the timeout is reached, little-spas will return the most recently cached response and trigger a second request to the API that has no timeout and does not block the bundle response to your users. The returned bundle will be set to expire immediately and that second request should be available in the little-spas cache the next time your user makes a request. YouTube requests that do not use JSON-C are a good example of a request that can take a second or more. You never want users to wait that long.</p>
+
+<h5>More on the filter parameter</h5>
+<p>There's not much you can compress in a JSON response, but there may be a lot of stuff you don't need. Consider the "searchTweets" example above. All we care about is the text of the tweet and who sent it. By dropping the other stuff we reduce the size of the API response by over 75%.</p>
+<p>The map should reflect the structure of the JSON returned by the API, using the exact same keys and heiararchy. Properties and objects not included in the map will be discarded. A key with the value of "true" will cause that property or object to be kept in its entirety. An key may have and object that further describes the content within that should be kept. Array maps should have just one element in the array which is an object describing the elements to keep within the array element.</p>
+
+<h5>More on the cleanup parameters</h5>
+<p> A cleanup parameter can be bound to a API response object or to the entire bundle. In the cleanup you can perform any kind of transform you see fit. My first use case was to take an API response object from Vimeo, transform it to match the YouTube format then concatenate and sort the two. This way my client side code could be written for a basic YouTube stream but I'd be interleaving YouTube and Vimeo feeds together.</p>
+	
+<p style="text-align:right;">Next: <a href="useIt.html">Use Your Bundle</a></p>
+</section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">little-spas maintained by <a href="https://github.com/dtex">dtex</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
