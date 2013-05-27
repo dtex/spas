@@ -4,11 +4,11 @@
   <head>
     <meta charset='utf-8' />
     <meta http-equiv="X-UA-Compatible" content="chrome=1" />
-    <meta name="description" content="little-spas : Super Proxy Asset Server" />
+    <meta name="description" content="spas : Super Proxy Asset Server" />
 
-    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="css/stylesheet.css">
 
-    <title>little-spas | Installation</title>
+    <title>spas | Installation</title>
   </head>
 
   <body>
@@ -16,14 +16,14 @@
     <!-- HEADER -->
     <div id="header_wrap" class="outer">
         <header class="inner">
-          <a id="forkme_banner" href="https://github.com/dtex/little-spas">View on GitHub</a>
+          <a id="forkme_banner" href="https://github.com/dtex/spas">View on GitHub</a>
 
-          <h1 id="project_title">little-spas</h1>
-          <h2 id="project_tagline">Open Sourced Super Proxy Asset Server</h2>
+          <h1 id="project_title">spas</h1>
+          <h2 id="project_tagline">Super Proxy Asset Server</h2>
 
             <section id="downloads">
-              <a class="zip_download_link" href="https://github.com/dtex/little-spas/zipball/master">Download this project as a .zip file</a>
-              <a class="tar_download_link" href="https://github.com/dtex/little-spas/tarball/master">Download this project as a tar.gz file</a>
+              <a class="zip_download_link" href="https://github.com/dtex/spas/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/dtex/spas/tarball/master">Download this project as a tar.gz file</a>
             </section>
         </header>
     </div>
@@ -33,84 +33,66 @@
       <section id="main_content" class="inner">
 	        <navigation>
 			<ul>
-				<li><a class="active" href="installation.html">Install and Configure</a></li>
+				<li><a class="active" href="installation.html">Install</a></li>
+				<li><a href="configure.html">Configure</a></li>
 				<li><a href="buildIt.html">Build Your Bundle</a></li>
 				<li><a href="useIt.html">Use Your Bundle</a></li>
 				<li><a href="tips.html">Tips and Tricks</a></li>
 			</ul>			
 			<div class="clear" />
 		</navigation>
-<h3>Installation</h3>
+		<h3>Installation</h3>
+	
+		<h4>node.js</h4>
+		<p>spas is a node.js project. You can download node from <a href="http://nodejs.org">nodejs.org</a><p>
+	
+		<h4>redis</h4>
+		<p>spas uses the redis key-value store available from <a href="http://redis.io/" target="_blank">redis.io</a></p>
 
-<h4>node.js</h4>
-<p>little-spas runs under node.js You can download it from <a href="http://nodejs.org">nodejs.org</a><p>
+		<h4>spas</h4>
+		<p>spas is a standalone node.js application. It is not meant to be used as a module in another application. It can be installed globally using npm or in a folder of your choice using a tar or zip download from github.</p>
 
-<h4>redis</h4>
-<p>little-spas uses the redis key-value store available from <a href="http://redis.io/" target="_blank">redis.io</a></p>
+		<h5>Global install using NPM:</h5>
+		<p>First install the application</p>
+		<pre><code>$ [sudo] npm install spas -g</code></pre><br/>
+		<hr/>
 
-<h4>little-spas</h4>
-<p>little-spas is a standalone node.js application. It is not meant to be used as a module in another application. It should be installed globally with NPM.</p>
-<h5>Global install using NPM:</h5>
-<p>First install the application</p>
-<pre><code>$ [sudo] npm install little-spas -g</code></pre><br/>
-<hr/>
-<h3>Create a Project</h3>
-<p>You will need a folder for your little-spas project. It can be anywhere you like</p>
-<pre><code>$ cd /var/foo
+		<h6>Create a Project</h6>
+		<p>You will need a folder for your spas project. It can be anywhere you like</p>
+		<pre><code>$ cd /var/foo
 $ mkdir myProject
-$ cd myProject
-</code></pre><br/>
-<p>Next use little-spas and NPM to add the necessary files to your project</p>
-<pre><code>$ little-spas --create
-$ npm install
-</code></pre><br/>
-<hr/>
-<h3>Test</h3>
-<p>At this point you can test little-spas. A sample bundle configuration is included for testing. Launch little-spas from your project directory:
-<pre><code>node little-spas --dev</code></pre><br/>
-From your browser navigate to <a href="http://localhost:3000/bundle/sample">http://localhost:3000/bundle/sample</a>. You should get a JSON object in the response.</p>
+$ cd myProject</code></pre><br/>
+		<p>Next use spas and npm to add the necessary files to your project</p>
+		<pre><code>$ spas --create
+$ npm install</code></pre><br/>
+		<p><strong>-- or --</strong></p>
 
-<hr/>
-<h3>Configure</h3>
-<p>little-spas uses a basic configuration file (config.json). You'll want to edit this file to match your environment. There are two branches to the config file: development and live. If you pass the dev parameter to little spas:
-<pre><code>node little-spas --dev</code></pre><br/>
-the development values will be used. Otherwise, the live values will be used.</p>
-<p>Here's a sample config file:</p>
-<pre><code>{
-  "development": {
-    "url": "http://localhost:3000",
-    "port": 3000,
-    "redis": {
-      "port": 6379,
-      "address": "localhost"
-    }		
-  },
-  "live": {
-    "url": "http://spas.mycompany.com",
-    "port": 80,
-    "redis": {
-      "port": 6379,
-      "address": "nodejitsudb123456789.redis.irstack.com",
-      "auth": "nodejitsudb123456789.redis.irstack.com:f123abc456d978901e23f4g567hijkl8"
-    }
-  }
-}</code></pre>
-<p><strong>url:</strong> The root URL for little-spas<br/>
-<strong>port:</strong> This is the port on which little-spas will listen for requests<br/>
-<strong>redis:</strong> The redis configuration object<br/>
-<strong>redis.port:</strong> The port that redis is listening on<br/>
-<strong>redis.address:</strong> The address of your redis server<br/>
-<strong>reds.auth:</strong> (Optional) If your redis server is password protected, use the password here</p>
+		<h5>Local install using tar or zip file:</h5>
+		<p>Grab the latest from the master branch using the zip or tar link above or grab a specific version from <a href="http://www.github.com/dtex/spas/tags">github</a></p>
+		<p>Extract to a location of your choice (i.e. /var/www/spas)</p>
+		<p>Use spas and npm to add the necessary files to your project</p>
+		<pre><code>$ cd /var/www/spas
+$ spas --create local
+$ npm install</code></pre><br/>
+		<hr/>
+
+		<h3>Test</h3>
+		<p>At this point you can test spas. A sample bundle configuration is included for testing. Launch spas from your project directory:
+		<p>For global installs</p>
+		<pre><code>spas --dev</code></pre><br/>
+		<p>or for local installs</p>
+		<pre><code>node spas --dev</code></pre><br/>
+		<p>Assuming you are serving from your local machine, navigate to <a href="http://localhost:3000/sample">http://localhost:3000/sample</a>. You should get a JSON object in the response.</p>
 
 	
-<p style="text-align:right;">Next: <a href="buildIt.html">Build Your Bundle</a></p>
+<p style="text-align:right;">Next: <a href="configure.html">Configure spas</a></p>
 </section>
     </div>
 
     <!-- FOOTER  -->
     <div id="footer_wrap" class="outer">
       <footer class="inner">
-        <p class="copyright">little-spas maintained by <a href="https://github.com/dtex">dtex</a></p>
+        <p class="copyright">spas maintained by <a href="https://github.com/dtex">dtex</a></p>
         <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
       </footer>
     </div>
