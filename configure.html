@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="spas : Super Proxy Asset Server" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="css/stylesheet.css">
+
+    <title>spas | Configure</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/dtex/spas">View on GitHub</a>
+
+          <h1 id="project_title">spas</h1>
+          <h2 id="project_tagline">Super Proxy Asset Server</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/dtex/spas/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/dtex/spas/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+	        <navigation>
+			<ul>
+				<li><a href="installation.html">Install</a></li>
+				<li><a class="active" href="configure.html">Configure</a></li>
+				<li><a href="buildIt.html">Build Your Bundle</a></li>
+				<li><a href="useIt.html">Use Your Bundle</a></li>
+				<li><a href="tips.html">Tips and Tricks</a></li>
+			</ul>			
+			<div class="clear" />
+		</navigation>
+		<h3>Configure</h3>
+		<p>spas uses a simple json configuration file (config.json). You'll want to edit this file to match your environment. There are two branches to the config file: development and live. If you pass the dev parameter to spas:
+		<pre><code>$ node spas --dev
+
+or if you are global
+
+$ spas --dev</code></pre><br/>
+the development values will be used. Otherwise, the live values will be used.</p>
+		<p>Here's a sample config file:</p>
+		<pre><code>{
+  "development": {
+    "url": "http://localhost:3000",
+    "port": 3000,
+    "redis": {
+      "port": 6379,
+      "address": "localhost"
+    }		
+  },
+  "live": {
+    "url": "http://spas.mycompany.com",
+    "port": 80,
+    "redis": {
+      "port": 6379,
+      "address": "nodejitsudb123456789.redis.irstack.com",
+      "auth": "nodejitsudb123456789.redis.irstack.com:f123abc456d978901e23f4g567hijkl8"
+    }
+  }
+}</code></pre>
+		<p><strong>url:</strong> The root URL for spas<br/>
+			<strong>port:</strong> This is the port on which spas will listen for requests<br/>
+			<strong>redis:</strong> The redis configuration object<br/>
+			<strong>redis.port:</strong> The port that redis is listening on<br/>
+			<strong>redis.address:</strong> The address of your redis server<br/>
+			<strong>reds.auth:</strong> (Optional) If your redis server is password protected, use the password here</p>
+
+		<h4>Configure authentication services</h4>
+		<p>spas can use OAuth or OAuth2 to authenticate as a user against api providers. Important: This is not a mechanism for your users to authenticate themselves, this is so spas can authenticate as the owner of the resources you wish to use. There is only one user per bundle part (see <a href="buildIt.html">Build your bundle</a> for an explanation of bundle parts).</p>
+		<p>Here's a sample development node with authentication providers:</p>
+		<pre><code>"development": {
+  "url": "http://localhost:3000",
+  "port": 3000,
+  "redis": {
+    "port": 6379,
+    "address": "localhost"
+  },
+  "authentication": {
+    "google": {
+      "baseSite": "https://accounts.google.com",
+      "authorizePath": "/o/oauth2/auth",
+      "accessTokenPath": "/o/oauth2/token",
+      "client_id": "12345678901-ipsumloremgobbledygook.apps.googleusercontent.com",
+      "client_secret": "shhhhiamyoursecret"
+    },
+    "smugmug": {
+      "requestTemporaryCredentials": "https://api.smugmug.com/services/oauth/getRequestToken.mg",
+      "authorize": "https://api.smugmug.com/services/oauth/authorize.mg",
+      "requestAccessToken": "https://api.smugmug.com/services/oauth/getAccessToken.mg",
+      "version": "1.0",
+      "encryption": "PLAINTEXT",
+      "oauth_consumer_key": "ipsumloremgobbledygook",
+      "client_secret": "shhhhiamyoursecret"
+    }
+  }
+}</code></pre>
+	
+		<p>The google node above is using oAuth2.</p>
+		<p><strong>baseSite:</strong> The base URL for authentication<br/>
+			<strong>authorizePath:</strong> The authorize path<br/>
+			<strong>accessTokenPath:</strong> The access token path<br/>
+			<strong>client_id:</strong> Your application's client id<br/>
+			<strong>client_secret:</strong> Your application's secret</p>
+			
+		<p>The smugmug node above is using oAuth.</p>
+		<p><strong>requestTemporaryCredentials:</strong> URL for temporary credentials<br/>
+			<strong>authorize:</strong> The authorize path<br/>
+			<strong>requestAccessToken:</strong> The access token path<br/>
+			<strong>version:</strong> oAuth version<br/>
+			<strong>encryption:</strong> Encryption type for your requests<br/>
+			<strong>oauth_consumer_key:</strong> Your application's consumer key<br/>
+			<strong>client_secret:</strong> Your application's secret</p>
+
+		<p style="text-align:right;">Next: <a href="buildIt.html">Build Your Bundle</a></p>	
+	</section>
+</div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">spas maintained by <a href="https://github.com/dtex">dtex</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
