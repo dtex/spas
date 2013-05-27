@@ -1,6 +1,6 @@
 # spas
 
-Open Sourced Super Proxy Asset Server
+Super Proxy Asset Server
 
 spas is a pragmatic tool for bundling multiple API requests into a single request/response for the browser. If you have a webpage that talks to Twitter, Flickr, YouTube, etc., spas can make it better. spas throttles, caches, parses, concatenates and minifies API responses and serves them all up in one tidy little package for the browser.
 
