@@ -40,6 +40,5 @@
   },
   "devDependencies": {
 	"vows": "0.x.x"  
-  },
-  "preferGlobal": true
+  }
 }
