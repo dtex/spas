@@ -42,7 +42,7 @@
 			<div class="clear" />
 		</navigation> <h3>Build Your Bundle</h3>
 <p>A bundle is a group of API requests that you want combined into a single response. Each API request is a bundle part. Generally you will have a bundle for each website you build, but you may choose to have bundles that are only called from certain pages. Since spas responses can be highly optimized, I prefer to bundle everything together and minimize the number of requests made by the client even though I may not need one particular API all the time. We send all the correct caching and expiration headers to the browser and we want to make the minimum number of requests.</p>
-<p>Bundles are defined in js files at the root of your project directory. Here is the sample.js bundle that is generated when you run spas --create:
+<p>Bundles are defined in js files. For spas instances the are installed globally the bundles are stored in the current working directory (read: The directory you were in when you launched spas). For local installs, the bundles are stored in the bundles directory in your spas folder. Here is the sample.js bundle that is generated when you run spas --create:
 <code><pre>var spashttp = require("spas-http");
 
 exports.sample = {
@@ -73,7 +73,7 @@ exports.sample = {
   }
 };</pre></code></p>
 
-<p>The module we are requiring is a SPAS request module. spas-http is maintained in a <a href="https://github.com/dtex/spas-http">separate repository</a> and will handle most basic json requests. spas-http documentation can be found at <a href="http://dtex.github.com/spas-http">http://dtex.github.com/spas-http</a></p>
+<p>This bundle is called sample and has two bundle parts: searchTweets and searchMoreTweets. The module we are requiring is the generic spas http request module. spas-http is maintained in a <a href="https://github.com/dtex/spas-http">separate repository</a> and will handle most basic json requests. spas-http documentation can be found at <a href="http://dtex.github.com/spas-http">http://dtex.github.com/spas-http</a></p>
 <p>Each bundle is an object subordinate to your <a href="http://nodejs.org/api/modules.html#modules_module_exports" target="_blank">exports object</a>. The bundle name should be unique otherwise your bundles will collide in Redis. The bundle's immediate children are API request objects (aka "Bundle Parts"). We have two in our sample, "searchTweets" and "searchMoreTweets".</p>
 <strong>resource:</strong> (object and method, required) &mdash; The method you wish to use to retrieve your data.<br/>
 <strong>params:</strong> (object, required) &mdash; Parameters object that is passed to resource method<br/>
