@@ -68,8 +68,10 @@ var
   // My modules
   , nconf = require('./lib/config').nconf
   , winston = require('./lib/logging').winston
-  , config = require('./lib/config').config;
-  
+  , config = require('./lib/config').config
+  , bundleManager = require('./lib/bundleManager')
+;
+
 if (nconf.get('create')) {
 	process.exit();
 }
@@ -78,8 +80,7 @@ var engine = require('./lib/engine')
   , oauth = require('./lib/oauth')
   , oauth2 = require('./lib/oauth2')
   , keystone2 = require('./lib/keystone2')
-  , bundleManager = require('./lib/bundleManager')
-
+  
   // Other Dependencies
   , director = require('director')
   , _ = require('underscore')._
