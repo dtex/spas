@@ -58,28 +58,22 @@ Command line parameters
 
 // ## Module dependencies.
 var
+  // My lib files
+  nconf = require('./lib/config').nconf
+  , config = require('./lib/config').config
+  , winston = require('./lib/logging').winston
+  , bundleManager = require('./lib/bundleManager')
+  , engine = require('./lib/engine')
+  , oauth = require('./lib/oauth')
+  , oauth2 = require('./lib/oauth2')
+  , keystone2 = require('./lib/keystone2')
+  
   // Built in modules
     http = require('http')
   , url = require('url')
   , querystring = require('querystring')
   , fs = require('fs')
   , spawn = require('child_process').spawn
-
-  // My modules
-  , nconf = require('./lib/config').nconf
-  , winston = require('./lib/logging').winston
-  , config = require('./lib/config').config
-  , bundleManager = require('./lib/bundleManager')
-;
-
-if (nconf.get('create')) {
-	process.exit();
-}
-
-var engine = require('./lib/engine')
-  , oauth = require('./lib/oauth')
-  , oauth2 = require('./lib/oauth2')
-  , keystone2 = require('./lib/keystone2')
   
   // Other Dependencies
   , director = require('director')
@@ -87,8 +81,12 @@ var engine = require('./lib/engine')
   , cronJob = require("cron").CronJob
 ;
 
-var bundles = {},
-	cronjobs = [];
+if (nconf.get('create')) {
+	process.exit();
+}
+
+GLOBAL.bundles = {};
+GLOBAL.cronjobs = [];
 
 //
 // ## Run spas as a service
@@ -135,7 +133,7 @@ if (nconf.get('service')) {
 					key = nonceArray[1],
 					self = this;
 
-					oauth.saveOauthToken( bundles[bid][key], querystring.parse((url.parse(this.req.url).query)).oauth_nonce, querystring.parse((url.parse(this.req.url).query)).oauth_token, function( tout ) {
+					oauth.saveOauthToken( GLOBAL.bundles[bid][key], querystring.parse((url.parse(this.req.url).query)).oauth_nonce, querystring.parse((url.parse(this.req.url).query)).oauth_token, function( tout ) {
 	
 						if (_.has(tout, 'redirect')) {
 							self.res.statusCode = 302;
@@ -181,7 +179,7 @@ if (nconf.get('service')) {
 	    				gzip = true;
 	    			}
 	    		}
-	    		engine.fulfill ( this.res, this.req.headers['x-forwarded-for'] || this.req.connection.remoteAddress, bid, bundles[bid], querystring.parse((url.parse(this.req.url).query)).callback, gzip );
+	    		engine.fulfill ( this.res, this.req.headers['x-forwarded-for'] || this.req.connection.remoteAddress, bid, GLOBAL.bundles[bid], querystring.parse((url.parse(this.req.url).query)).callback, gzip );
 	    	}
 		},
 		
@@ -195,7 +193,7 @@ if (nconf.get('service')) {
 	    				gzip = true;
 	    			}
 	    		}
-	    		engine.fulfill ( this.res, this.req.headers['x-forwarded-for'] || this.req.connection.remoteAddress, bid, bundles[bid], querystring.parse((url.parse(this.req.url).query)).callback, gzip );
+	    		engine.fulfill ( this.res, this.req.headers['x-forwarded-for'] || this.req.connection.remoteAddress, bid, GLOBAL.bundles[bid], querystring.parse((url.parse(this.req.url).query)).callback, gzip );
 	    	}
 		},
 
@@ -213,7 +211,7 @@ if (nconf.get('service')) {
 	    				gzip = true;
 	    		}
 	    		
-	    		engine.fulfill ( this.res, this.req.headers['x-forwarded-for'] || this.req.connection.remoteAddress, bid, bundles[bid], querystring.parse((url.parse(this.req.url).query)).callback, gzip );
+	    		engine.fulfill ( this.res, this.req.headers['x-forwarded-for'] || this.req.connection.remoteAddress, bid, GLOBAL.bundles[bid], querystring.parse((url.parse(this.req.url).query)).callback, gzip );
 	    	}
 		}
 	});
@@ -228,39 +226,40 @@ if (nconf.get('service')) {
 		});
 	});
 
-	server.listen(config.port);
-	winston.info('Listening on port ' + config.port);
-
+	//
+	// ## Listener for bundle updater
+	//
 	var bundler = new bundleManager();
-
 	bundler.on('bundlesUpdated', function(newBundles) {
-
-    	winston.info('event bundlesUpdated');
-    	bundles = newBundles;
-
-    	// ### Stop all the existing scheduled jobs
-    	_.each(cronjobs, function (job, idx) {
+		
+		winston.info('event bundlesUpdated');
+		bundles = newBundles;
+		
+		// ### Stop all the existing scheduled jobs
+		_.each(GLOBAL.cronjobs, function (job, idx) {
 	    	job.stop();
 	    	delete job;
-    	});
-
-    	cronjobs = [];
-
-    	// ### Schedule jobs defined in bundles
+		});
+		
+		GLOBAL.cronjobs = [];
+		
+		// ### Schedule jobs defined in bundles
 		_.each(bundles, function (bundle, bid) {
 			_.each(bundle, function (api, key) {
 				if (api.schedule) {
 					var job = new cronJob(api.schedule, function(){
 			    		winston.info('cronjob '+key+' called');
-			    		engine.refresh(api, key, bid, bundle);
+			    		engine.refresh(api, key, bid, bundle);  
 			    	}, null, true);
-			    	cronjobs.push(job);
+			    	GLOBAL.cronjobs.push(job);
 			    }
 			});
 		});
-
-    });
-
-    bundler.refreshBundles();
-
+	
+	});
+	
+	bundler.refreshBundles();
+	
+	server.listen(config.port);
+	winston.info('Listening on port ' + config.port);
 }
