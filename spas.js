@@ -56,11 +56,14 @@ Command line parameters
 
 */
 
+GLOBAL.bundles = {};
+GLOBAL.cronjobs = [];
+GLOBAL.config = require('./lib/config').config;
+
 // ## Module dependencies.
 var
   // My lib files
   nconf = require('./lib/config').nconf
-  , config = require('./lib/config').config
   , winston = require('./lib/logging').winston
   , bundleManager = require('./lib/bundleManager')
   , engine = require('./lib/engine')
@@ -85,9 +88,6 @@ if (nconf.get('create')) {
 	process.exit();
 }
 
-GLOBAL.bundles = {};
-GLOBAL.cronjobs = [];
-
 //
 // ## Run spas as a service
 //
@@ -98,7 +98,7 @@ if (nconf.get('service')) {
 		fs.mkdirSync(process.cwd() + '/logs');
 	}
 	
-	var	out = fs.openSync(process.cwd() + '/logs/spasout.log', 'a'),
+	var	out = fs.openSync(process.cwd() + '/logs/unhandled-spasout.log', 'a'),
 		err = fs.openSync(process.cwd() + '/logs/spaserr.log', 'a');
 
 	// Spawn the main SPAS process
@@ -179,7 +179,7 @@ if (nconf.get('service')) {
 	    				gzip = true;
 	    			}
 	    		}
-	    		engine.fulfill ( this.res, this.req.headers['x-forwarded-for'] || this.req.connection.remoteAddress, bid, GLOBAL.bundles[bid], querystring.parse((url.parse(this.req.url).query)).callback, gzip );
+	    		engine.fulfill ( this.res, this.req.headers['x-forwarded-for'] || this.req.connection.remoteAddress, bid, querystring.parse((url.parse(this.req.url).query)).callback, gzip );
 	    	}
 		},
 		
@@ -192,7 +192,7 @@ if (nconf.get('service')) {
 	    				gzip = true;
 	    			}
 	    		}
-	    		engine.fulfill ( this.res, this.req.headers['x-forwarded-for'] || this.req.connection.remoteAddress, bid, GLOBAL.bundles[bid], querystring.parse((url.parse(this.req.url).query)).callback, gzip );
+	    		engine.fulfill ( this.res, this.req.headers['x-forwarded-for'] || this.req.connection.remoteAddress, bid, querystring.parse((url.parse(this.req.url).query)).callback, gzip );
 	    	}
 		},
 
@@ -210,7 +210,7 @@ if (nconf.get('service')) {
 	    				gzip = true;
 	    		}
 	    		
-	    		engine.fulfill ( this.res, this.req.headers['x-forwarded-for'] || this.req.connection.remoteAddress, bid, GLOBAL.bundles[bid], querystring.parse((url.parse(this.req.url).query)).callback, gzip );
+	    		engine.fulfill ( this.res, this.req.headers['x-forwarded-for'] || this.req.connection.remoteAddress, bid, querystring.parse((url.parse(this.req.url).query)).callback, gzip );
 	    	}
 		}
 	});
@@ -259,6 +259,6 @@ if (nconf.get('service')) {
 	
 	bundler.refreshBundles();
 	
-	server.listen(config.port);
-	winston.info('Listening on port ' + config.port);
+	server.listen(GLOBAL.config.port);
+	winston.info('Listening on port ' + GLOBAL.config.port);
 }
