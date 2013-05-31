@@ -81,12 +81,13 @@ var
   // Other Dependencies
   , director = require('director')
   , _ = require('underscore')._
-  , cronJob = require("cron").CronJob
 ;
 
 if (GLOBAL.config.args.create) {
 	process.exit();
 }
+
+GLOBAL.config.isLocal = fs.existsSync(process.cwd() + '/spas.js');
 
 //
 // ## Run spas as a service
@@ -98,18 +99,18 @@ if (GLOBAL.config.args.service) {
 		fs.mkdirSync(process.cwd() + '/logs');
 	}
 	
-	var	out = fs.openSync(process.cwd() + '/logs/unhandled-spasout.log', 'a'),
+	var	out = fs.openSync(process.cwd() + '/logs/spasout.log', 'a'),
 		err = fs.openSync(process.cwd() + '/logs/spaserr.log', 'a');
 
 	// Spawn the main SPAS process
-	var params = [];
+	var params = GLOBAL.config.isLocal ? ['spas'] : [];
 	if (GLOBAL.config.args.dev) params.push('--dev');
 	if (GLOBAL.config.args.log) {
 		params.push('--log');
 		params.push(GLOBAL.config.args.log);
 	}
 
-	var spasService = spawn('spas', params, { detached: true, stdio: [ 'ignore', out, err ] });
+	var spasService = spawn(GLOBAL.config.isLocal ? 'node' : 'spas', params, { detached: true, stdio: [ 'ignore', out, err ] });
 
 	spasService.unref();
 
@@ -228,34 +229,6 @@ if (GLOBAL.config.args.service) {
 	// ## Listener for bundle updater
 	//
 	var bundler = new bundleManager();
-	bundler.on('bundlesUpdated', function(newBundles) {
-		
-		winston.info('event bundlesUpdated');
-		bundles = newBundles;
-		
-		// ### Stop all the existing scheduled jobs
-		_.each(GLOBAL.cronjobs, function (job, idx) {
-	    	job.stop();
-	    	delete job;
-		});
-		
-		GLOBAL.cronjobs = [];
-		
-		// ### Schedule jobs defined in bundles
-		_.each(bundles, function (bundle, bid) {
-			_.each(bundle, function (api, key) {
-				if (api.schedule) {
-					var job = new cronJob(api.schedule, function(){
-			    		winston.info('cronjob '+key+' called');
-			    		engine.refresh(api, key, bid, bundle);  
-			    	}, null, true);
-			    	GLOBAL.cronjobs.push(job);
-			    }
-			});
-		});
-	
-	});
-	
 	bundler.refreshBundles();
 	
 	server.listen(GLOBAL.config.port);
