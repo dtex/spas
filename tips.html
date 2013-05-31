@@ -18,8 +18,8 @@
         <header class="inner">
           <a id="forkme_banner" href="https://github.com/dtex/spas">View on GitHub</a>
 
-          <h1 id="project_title">spas</h1>
-          <h2 id="project_tagline">Super Proxy Asset Server</h2>
+          <h1 id="project_title"><a href="/spas/">spas</a></h1>
+          <h2 id="project_tagline"><a href="/spas/">Super Proxy Asset Server</a></h2>
 
             <section id="downloads">
               <a class="zip_download_link" href="https://github.com/dtex/spas/zipball/master">Download this project as a .zip file</a>
@@ -40,19 +40,19 @@
 				<li><a class="active" href="tips.html">Tips and Tricks</a></li>
 			</ul>			
 			<div class="clear" />
-		</navigation><h3>Keep Your Old Code</h3>
-<p>You don't have to start over or even modify your existing JS code. Say for example that you are using a simple script tag to make a JSONP call like this:
-<code><pre>
-&lt;script>
+		</navigation>
+		
+		<h3>Keep Your Old Code</h3>
+		<p>You don't have to start over or even modify your existing JS code. Say for example that you are using a simple script tag to make a JSONP call like this:</p>
+		<pre><code>&lt;script>
   var doCoolStuff = function(data) {
     // Your awesome code is here
   }
 &lt;/script>
-&lt;script src="http://search.twitter.com/search.json?q=nko3&callback=doCoolStuff">&lt;/script>
-</pre></code></p>
-<p>Just wrap it with another function like this:
-<code><pre>
-&lt;script>
+// You should do this next part asynchronously
+&lt;script src="http://search.twitter.com/search.json?q=nko3&callback=doCoolStuff">&lt;/script></code></pre>
+			<p>Just wrap it with another function like this:
+				<pre><code>&lt;script>
   var spasCallBack = function(data) {
   	doCoolStuff(data.searchTweets.result);
   }
@@ -61,9 +61,107 @@
     // Your awesome code is here
   }
 &lt;/script>
-&lt;script src="http://spas.yoursite.com/sample?callback=spasCallBack">&lt;/script>
-</pre></code></p>
-</section>
+// You should do this next part asynchronously
+&lt;script src="http://spas.yoursite.com/sample?callback=spasCallBack">&lt;/script></code></pre>
+		
+		<hr/>
+		<h3>Filter Your Results</h3>
+		<p>This is a basic feature of spas, but it's very important and should not be overlooked. Even API's that allow you to select which properties are returned in the results will invariably have some cruft that you just don't need to send to the client. For example, this bundle:</p>
+		<pre><code>var spashttp = require("spas-http");
+
+exports.sample = {
+  "searchTweets": {
+    "resource": spashttp.request,
+    "params": {
+      "url": "http://search.twitter.com/search.json",
+      "q":"spas",
+      "lang": "en" 
+    },
+    "cacheduration": 3600
+  }
+};</code></pre>
+		<p>Will return:</p>
+		<pre><code>{
+	"expires":"2013-05-31T17:11:20.417Z",
+	"searchTweets":{
+		"expires":"2013-05-31T17:11:20.474Z",
+		"result":{
+			"completed_in":0.067,
+			"max_id":340499259960999940,
+			"max_id_str":"340499259960999937",
+			"next_page":"?page=2&max_id=340499259960999937&q=spas&lang=en",
+			"page":1,
+			"query":"spas",
+			"refresh_url":"?since_id=340499259960999937&q=spas&lang=en",
+			"results":[
+				{
+					"created_at":"Fri, 31 May 2013 16:05:24 +0000",
+					"from_user":"Jen_Durham",
+					"from_user_id":614768772,
+					"from_user_id_str":"614768772",
+					"from_user_name":"Jen Durham",
+					"geo":null,
+					"id":340499259960999940,
+					"id_str":"340499259960999937",
+					"iso_language_code":"en",
+					"metadata":{
+						"result_type":"recent"
+					},
+					"profile_image_url":"http://a0.twimg.com/profile_images/2913098521/3fa3895454551bde815731f6bfb4f8df_normal.jpeg",
+					"profile_image_url_https":"https://si0.twimg.com/profile_images/2913098521/3fa3895454551bde815731f6bfb4f8df_normal.jpeg",
+					"source":"&lt;a href=&quot;http://twitter.com/download/android&quot;&gt;Twitter for Android&lt;/a&gt;",
+					"text":"RT @REALTORS: RT @houselogic: With pool season comes pool safety. Here are some tips on making your pool safe http://t.co/I56sbF20qP"
+				},
+				// ... +49 more of these results objects
+			],
+			"results_per_page":15,
+			"since_id":0,
+			"since_id_str":"0",
+			"size":11584
+		},
+		"cname":"searchTweets"
+	},
+	"secleft":3599
+}</code></pre>
+			<p>But maybe all we need are from_user and text. To easily do this we just add a filter property to the bundle description, like so:</p>
+			<pre><code>var spashttp = require("spas-http");
+
+exports.sample = {
+  "searchTweets": {
+    "resource": spashttp.request,
+    "params": {
+      "url": "http://search.twitter.com/search.json",
+      "q":"spas",
+      "lang": "en" 
+    },
+    "cacheduration": 3600,
+    "filter": {
+      "results": [{
+        "from_user": true,
+        "text": true }]
+    }
+  }
+};</code></pre>
+			<p>And that will give us a much leaner result:</p>
+			<pre><code>{
+	"expires":"2013-05-31T17:11:20.417Z",
+	"searchTweets":{
+		"expires":"2013-05-31T17:11:20.474Z",
+		"result":{
+			"results":[
+				{
+					"from_user":"Jen_Durham",
+					"text":"RT @REALTORS: RT @houselogic: With pool season comes pool safety. Here are some tips on making your pool safe http://t.co/I56sbF20qP"
+				},
+				// ... +49 more of these much smaller results objects
+			]
+		},
+		"cname":"searchTweets"
+	},
+	"secleft":3599
+}</code></pre>
+			<p>filter is a quick an easy way to make huge improvements in performance.</p>
+		</section>
     </div>
 
     <!-- FOOTER  -->
@@ -73,8 +171,6 @@
         <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
       </footer>
     </div>
-
-    
 
   </body>
 </html>
