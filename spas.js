@@ -58,12 +58,12 @@ Command line parameters
 
 GLOBAL.bundles = {};
 GLOBAL.cronjobs = [];
-GLOBAL.config = require('./lib/config').config;
+GLOBAL.config = {};
 
 // ## Module dependencies.
 var
   // My lib files
-  nconf = require('./lib/config').nconf
+  configure = require('./lib/config')
   , winston = require('./lib/logging').winston
   , bundleManager = require('./lib/bundleManager')
   , engine = require('./lib/engine')
@@ -84,14 +84,14 @@ var
   , cronJob = require("cron").CronJob
 ;
 
-if (nconf.get('create')) {
+if (GLOBAL.config.args.create) {
 	process.exit();
 }
 
 //
 // ## Run spas as a service
 //
-if (nconf.get('service')) {
+if (GLOBAL.config.args.service) {
 
 	// Specify output and error log files
 	if (!fs.existsSync(process.cwd() + '/logs')) {
@@ -103,11 +103,10 @@ if (nconf.get('service')) {
 
 	// Spawn the main SPAS process
 	var params = [];
-	if (nconf.get('dev')) params.push('--dev');
-	if (nconf.get('sample')) params.push('--sample');
-	if (nconf.get('log')) {
+	if (GLOBAL.config.args.dev) params.push('--dev');
+	if (GLOBAL.config.args.log) {
 		params.push('--log');
-		params.push(nconf.get('log'));
+		params.push(GLOBAL.config.args.log);
 	}
 
 	var spasService = spawn('spas', params, { detached: true, stdio: [ 'ignore', out, err ] });
