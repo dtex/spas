@@ -78,10 +78,18 @@ h1 {
   font-weight: 700;
 }
 
+h1 a {
+	color: #fff;
+}
+
 h2 {
   padding-bottom: 10px;
   font-size: 32px;
   background: url('../images/bg_hr.png') repeat-x bottom;
+}
+
+h2 a {
+	color: #fff;
 }
 
 h3 {
@@ -230,7 +238,7 @@ dl p {
 
 hr {
   height: 1px;
-  margin-bottom: 5px;
+  margin: 12px 0;
   border: none;
   background: url('../images/bg_hr.png') repeat-x center;
 }
