@@ -87,22 +87,22 @@ if (GLOBAL.config.args.create) {
 	process.exit();
 }
 
-GLOBAL.config.isLocal = fs.existsSync(process.cwd() + '/spas.js');
-
 //
 // ## Run spas as a service
 //
 if (GLOBAL.config.args.service) {
 
-	// Specify output and error log files
+	// Specify output and error log file directories
 	if (!fs.existsSync(process.cwd() + '/logs')) {
 		fs.mkdirSync(process.cwd() + '/logs');
 	}
 	
+	// These files should not be used. All output should be to the
+	// Winston log files which are rotated daily
 	var	out = fs.openSync(process.cwd() + '/logs/spasout.log', 'a'),
 		err = fs.openSync(process.cwd() + '/logs/spaserr.log', 'a');
 
-	// Spawn the main SPAS process
+	// Spawn the main SPAS application
 	var params = GLOBAL.config.isLocal ? ['spas'] : [];
 	if (GLOBAL.config.args.dev) params.push('--dev');
 	if (GLOBAL.config.args.log) {
@@ -118,6 +118,15 @@ if (GLOBAL.config.args.service) {
 
 } else {
 
+	// ## See if client will accept gzip encoding
+	var acceptGZip = function(headers) {
+		if (_.has(headers, "accept-encoding") && headers["accept-encoding"].match(/\bgzip\b/)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
 	// ## Our Routes
 	var router = new director.http.Router({
 
@@ -169,48 +178,29 @@ if (GLOBAL.config.args.service) {
 			}
 		},
 
-		// A bundle is being requested
+		// A bundle is being requested using the old, deprecated format 'http://domain.com/bundle/bundlename'
 		'/bundle/:bid': {
 	    	get: function(bid) {
-	    		var gzip = false;
+	    		var gzip = acceptGZip(this.req.headers);
 	    		winston.error('Old style bundle request made for ' + bid);
-	    		if (_.has(this.req.headers, "accept-encoding")) {
-	    			if  (this.req.headers["accept-encoding"].match(/\bgzip\b/)) {
-	    				gzip = true;
-	    			}
-	    		}
 	    		engine.fulfill ( this.res, this.req.headers['x-forwarded-for'] || this.req.connection.remoteAddress, bid, querystring.parse((url.parse(this.req.url).query)).callback, gzip );
 	    	}
 		},
 		
-		// A bundle is being requested
+		// A bundle is being requested in the format 'http://domain.com/bundlename'
 		'/:bid': {
 	    	get: function(bid) {
-	    		var gzip = false;
-	    		if (_.has(this.req.headers, "accept-encoding")) {
-	    			if  (this.req.headers["accept-encoding"].match(/\bgzip\b/)) {
-	    				gzip = true;
-	    			}
-	    		}
+	    		var gzip = acceptGZip(this.req.headers);
 	    		engine.fulfill ( this.res, this.req.headers['x-forwarded-for'] || this.req.connection.remoteAddress, bid, querystring.parse((url.parse(this.req.url).query)).callback, gzip );
 	    	}
 		},
 
-		// A bundle is being requested
+		// A bundle is being requested in the format 'http://bundlename.domain.com'
 		'/': {
 	    	get: function() {
-	    		var gzip = false;
-                if (_.has(this.req.headers, 'host')) {
-                        bid = this.req.headers.host.split('.')[0];
-                } else {
-                        bid = '';
-                }
-
-	    		if (_.has(this.req.headers, "accept-encoding") && this.req.headers["accept-encoding"].match(/\bgzip\b/)) {
-	    				gzip = true;
-	    		}
-	    		
-	    		engine.fulfill ( this.res, this.req.headers['x-forwarded-for'] || this.req.connection.remoteAddress, bid, querystring.parse((url.parse(this.req.url).query)).callback, gzip );
+	    		var gzip = acceptGZip(this.req.headers);
+                bid = _.has(this.req.headers, 'host') ? this.req.headers.host.split('.')[0] : '';
+                engine.fulfill ( this.res, this.req.headers['x-forwarded-for'] || this.req.connection.remoteAddress, bid, querystring.parse((url.parse(this.req.url).query)).callback, gzip );
 	    	}
 		}
 	});
