@@ -72,7 +72,7 @@ var
   , keystone2 = require('./lib/keystone2')
   
   // Built in modules
-    http = require('http')
+  , http = require('http')
   , url = require('url')
   , querystring = require('querystring')
   , fs = require('fs')
