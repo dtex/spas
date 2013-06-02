@@ -104,6 +104,7 @@ if (GLOBAL.config.args.service) {
 
 	// Spawn the main SPAS application
 	var params = GLOBAL.config.isLocal ? ['spas'] : [];
+	params.push('--spawned');
 	if (GLOBAL.config.args.dev) params.push('--dev');
 	if (GLOBAL.config.args.log) {
 		params.push('--log');
