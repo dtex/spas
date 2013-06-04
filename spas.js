@@ -97,10 +97,6 @@ if (GLOBAL.config.args.service) {
 		fs.mkdirSync(process.cwd() + '/logs');
 	}
 	
-	// These files should not be used. All output should be to the
-	// Winston log files which are rotated daily
-	var	out = fs.openSync(process.cwd() + '/logs/spasout.log', 'a'),
-		err = fs.openSync(process.cwd() + '/logs/spaserr.log', 'a');
 
 	// Spawn the main SPAS application
 	var params = GLOBAL.config.isLocal ? ['spas'] : [];
@@ -111,7 +107,7 @@ if (GLOBAL.config.args.service) {
 		params.push(GLOBAL.config.args.log);
 	}
 
-	var spasService = spawn(GLOBAL.config.isLocal ? 'node' : 'spas', params, { detached: true, stdio: [ 'ignore', out, err ] });
+	var spasService = spawn(GLOBAL.config.isLocal ? 'node' : 'spas', params, { detached: true, stdio: [ 'ignore', 'ignore', 'ignore' ] });
 
 	spasService.unref();
 
