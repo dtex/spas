@@ -130,24 +130,37 @@ if (GLOBAL.config.args.service) {
 		// These are the return routes for authentication services
 		'/oauth': {
 			get: function() {
-				var nonce = querystring.parse((url.parse(this.req.url).query)).oauth_nonce;
+				var oauth_token = querystring.parse((url.parse(this.req.url).query)).oauth_token;
 				
-				if (!_.isUndefined(nonce)) {
+				//winston.info('oauth callback for ' + nonce + ' running');
+				winston.debug('Query parameters:' + JSON.stringify(querystring.parse((url.parse(this.req.url).query))));
+				
+				if (!_.isUndefined(oauth_token)) {
 					
-					var nonceArray = nonce.split(","),
-					bid = nonceArray[0],
-					key = nonceArray[1],
-					self = this;
+					var self = this,
+						cookies = {},
+						tempCookies = this.req.headers.cookie.split(';');
+					
+					_.each(tempCookies, function(cookie, index) {
+						cookie = cookie.split('=');
+						cookies[cookie[0]] = cookie[1];
+					});
+					
+					var bidkey = GLOBAL.config.guids[cookies.authCode].split(',');
+					
+					var bid = bidkey[0],
+						key = bidkey[1];
 
-					oauth.saveOauthToken( GLOBAL.bundles[bid][key], querystring.parse((url.parse(this.req.url).query)).oauth_nonce, querystring.parse((url.parse(this.req.url).query)).oauth_token, function( tout ) {
+					oauth.saveOauthToken( GLOBAL.bundles[bid][key], querystring.parse((url.parse(this.req.url).query)).oauth_token, querystring.parse((url.parse(this.req.url).query)).oauth_verifier, bid, key, function( tout ) {
 	
 						if (_.has(tout, 'redirect')) {
 							self.res.statusCode = 302;
 							self.res.setHeader("Location", tout.redirect);
 							self.res.end();
+							
 						}
-					
 					});
+					
 				} else {
 					
 					this.res.writeHead(404);
