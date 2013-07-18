@@ -135,7 +135,7 @@ if (GLOBAL.config.args.service) {
 				//winston.info('oauth callback for ' + nonce + ' running');
 				winston.debug('Query parameters:' + JSON.stringify(querystring.parse((url.parse(this.req.url).query))));
 				
-				if (!_.isUndefined(oauth_token)) {
+				if (!_.isUndefined(oauth_token) && !_.isUndefined(this.req.headers.cookie) {
 					
 					var self = this,
 						cookies = {},
