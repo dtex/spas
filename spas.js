@@ -67,7 +67,6 @@ var
   , winston = require('./lib/logging').winston
   , bundleManager = require('./lib/bundleManager')
   , engine = require('./lib/engine')
-  , streaming = require('./lib/streaming')
   , oauth = require('./lib/oauth')
   , oauth2 = require('./lib/oauth2')
   , keystone2 = require('./lib/keystone2')
@@ -98,6 +97,7 @@ if (GLOBAL.config.args.service) {
 		fs.mkdirSync(process.cwd() + '/logs');
 	}
 	
+
 	// Spawn the main SPAS application
 	var params = GLOBAL.config.isLocal ? ['spas'] : [];
 	params.push('--spawned');
@@ -132,9 +132,8 @@ if (GLOBAL.config.args.service) {
 			get: function() {
 				var oauth_token = querystring.parse((url.parse(this.req.url).query)).oauth_token;
 				
-				winston.info('oauth callback running');
+				//winston.info('oauth callback for ' + nonce + ' running');
 				winston.debug('Query parameters:' + JSON.stringify(querystring.parse((url.parse(this.req.url).query))));
-				winston.debug('Headers: ' + JSON.stringify(this.req.headers));
 				
 				if (!_.isUndefined(oauth_token)) {
 					
@@ -144,28 +143,23 @@ if (GLOBAL.config.args.service) {
 					
 					_.each(tempCookies, function(cookie, index) {
 						cookie = cookie.split('=');
-						cookies[cookie[0]] = cookie[1];
+						cookies[cookie[0].trim()] = cookie[1].trim();
 					});
 					
-					if (_.has(GLOBAL.config.guids, cookies.authCode)) {
-						var bidkey = GLOBAL.config.guids[cookies.authCode].split(',');
-						
-						var bid = bidkey[0],
-							key = bidkey[1];
+					var bidkey = GLOBAL.config.guids[cookies.authCode].split(',');
+					
+					var bid = bidkey[0],
+						key = bidkey[1];
+
+					oauth.saveOauthToken( GLOBAL.bundles[bid][key], querystring.parse((url.parse(this.req.url).query)).oauth_token, querystring.parse((url.parse(this.req.url).query)).oauth_verifier, bid, key, function( tout ) {
 	
-						oauth.saveOauthToken( GLOBAL.bundles[bid][key], querystring.parse((url.parse(this.req.url).query)).oauth_token, querystring.parse((url.parse(this.req.url).query)).oauth_verifier, bid, key, function( tout ) {
-		
-							if (_.has(tout, 'redirect')) {
-								self.res.statusCode = 302;
-								self.res.setHeader("Location", tout.redirect);
-								self.res.end();
-								
-							}
-						});
-					} else {
-						this.res.writeHead(500);
-						this.res.end('Unable to authenticate. GUID cookie is missing');
-					}
+						if (_.has(tout, 'redirect')) {
+							self.res.statusCode = 302;
+							self.res.setHeader("Location", tout.redirect);
+							self.res.end();
+							
+						}
+					});
 					
 				} else {
 					
@@ -197,46 +191,26 @@ if (GLOBAL.config.args.service) {
 		// A bundle is being requested using the old, deprecated format 'http://domain.com/bundle/bundlename'
 		'/bundle/:bid': {
 	    	get: function(bid) {
-	    		var gzip = acceptGZip(this.req.headers),
-	    			now = new Date();
+	    		var gzip = acceptGZip(this.req.headers);
 	    		winston.error('Old style bundle request made for ' + bid);
-	    		// If we have a bundle expiration && we are still valid, pipe a response
-				if (GLOBAL.bundles[bid] && GLOBAL.bundles[bid].expiration && GLOBAL.bundles[bid].expiration > now) {
-					streaming.response(bid, gzip, this.res, querystring.parse((url.parse(this.req.url).query)).callback);
-				} else {
-					engine.fulfill ( this.res, this.req.headers['x-forwarded-for'] || this.req.connection.remoteAddress, bid, querystring.parse((url.parse(this.req.url).query)).callback, gzip );
-				}
+	    		engine.fulfill ( this.res, this.req.headers['x-forwarded-for'] || this.req.connection.remoteAddress, bid, querystring.parse((url.parse(this.req.url).query)).callback, gzip );
 	    	}
 		},
 		
 		// A bundle is being requested in the format 'http://domain.com/bundlename'
 		'/:bid': {
 	    	get: function(bid) {
-	    		
-	    		var gzip = acceptGZip(this.req.headers),
-	    			now = new Date();
-	    		
-	    		// If we have a bundle expiration && we are still valid, pipe a response
-				if (GLOBAL.bundles[bid] && GLOBAL.bundles[bid].expiration && GLOBAL.bundles[bid].expiration > now) {
-					streaming.response(bid, gzip, this.res, querystring.parse((url.parse(this.req.url).query)).callback);
-				} else {
-					engine.fulfill ( this.res, this.req.headers['x-forwarded-for'] || this.req.connection.remoteAddress, bid, querystring.parse((url.parse(this.req.url).query)).callback, gzip );
-				}
+	    		var gzip = acceptGZip(this.req.headers);
+	    		engine.fulfill ( this.res, this.req.headers['x-forwarded-for'] || this.req.connection.remoteAddress, bid, querystring.parse((url.parse(this.req.url).query)).callback, gzip );
 	    	}
 		},
 
 		// A bundle is being requested in the format 'http://bundlename.domain.com'
 		'/': {
 	    	get: function() {
-	    		var gzip = acceptGZip(this.req.headers),
-	    			now = new Date();
+	    		var gzip = acceptGZip(this.req.headers);
                 bid = _.has(this.req.headers, 'host') ? this.req.headers.host.split('.')[0] : '';
-                // If we have a bundle expiration && we are still valid, pipe a response
-				if (GLOBAL.bundles[bid] && GLOBAL.bundles[bid].expiration && GLOBAL.bundles[bid].expiration > now) {
-					streaming.response(bid, gzip, this.res, querystring.parse((url.parse(this.req.url).query)).callback);
-				} else {
-					engine.fulfill ( this.res, this.req.headers['x-forwarded-for'] || this.req.connection.remoteAddress, bid, querystring.parse((url.parse(this.req.url).query)).callback, gzip );
-				}
+                engine.fulfill ( this.res, this.req.headers['x-forwarded-for'] || this.req.connection.remoteAddress, bid, querystring.parse((url.parse(this.req.url).query)).callback, gzip );
 	    	}
 		}
 	});
