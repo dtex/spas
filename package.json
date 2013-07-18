@@ -30,6 +30,7 @@
     "node-uuid": "1.x.x",
     "oauth": "0.x.x",
     "redis": "0.x.x",
+    "redis-rstream": "1.x.x",
     "request": "2.x.x",
     "spas-http": "0.x.x",
     "underscore": "1.x.x",
