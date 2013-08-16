@@ -11,6 +11,7 @@ pids
 results
 node_modules
 
+bundles/
 bundles/*
 !bundles/sample.js
 
