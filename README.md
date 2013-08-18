@@ -9,4 +9,5 @@ Every web site that hits multiple API's from the client should be doing this... 
 ## Documentation
 [http://dtex.github.com/spas](http://dtex.github.com/spas)
 
+[![NPM version](https://badge.fury.io/js/spas.png)](http://badge.fury.io/js/spas)
 [![Build Status](https://travis-ci.org/dtex/spas.png)](https://travis-ci.org/dtex/spas)
