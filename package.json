@@ -1,6 +1,6 @@
 {
   "name": "spas",
-  "version": "0.1.16",
+  "version": "0.1.17",
   "description": "spas is a pragmatic tool for bundling multiple API requests into a single request/response for the end user. spas throttles, caches, parses, filters, concatenates and minifies API responses. It serves them all up in one tidy little package resulting in fewer requests and smaller downloads.",
   "keywords": ["json", "api", "proxy", "cache", "mashup"],
   "homepage": "http://dtex.github.io/spas/",
@@ -21,24 +21,24 @@
   	"spas" : "./bin/spas"
   },
   "dependencies": {
-    "connect": "2.x.x",
-    "cron": "1.x.x",
-    "date-utils": "1.x.x",
-    "director": "1.x.x",
-    "nconf": "0.x.x",
-    "neuron": "0.x.x",
-    "node-uuid": "1.x.x",
-    "oauth": "0.x.x",
-    "redis": "0.x.x",
-    "redis-rstream": "0.1.x",
-    "request": "2.x.x",
-    "spas-http": "0.x.x",
-    "underscore": "1.x.x",
-    "watch": "0.x.x",
-    "winston": "0.x.x",
-    "rackspace-openstack": "0.0.10"
+    "connect": "2.8.5",
+    "cron": "1.0.1",
+    "date-utils": "1.2.14",
+    "director": "1.2.0",
+    "nconf": "0.6.7",
+    "neuron": "0.4.5",
+    "node-uuid": "1.4.1",
+    "oauth": "0.9.10",
+    "redis": "0.8.4",
+    "redis-rstream": "0.1.2",
+    "request": "2.27.0",
+    "spas-http": "0.1.16",
+    "underscore": "1.5.1",
+    "watch": "0.8.0",
+    "winston": "0.7.2",
+    "rackspace-openstack": "0.0.11"
   },
   "devDependencies": {
-	"vows": "0.x.x"  
+	"vows": "0.7.0"  
   }
 }
