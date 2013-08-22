@@ -32,7 +32,7 @@
     "redis": "0.8.4",
     "redis-rstream": "0.1.2",
     "request": "2.27.0",
-    "spas-http": "0.1.16",
+    "spas-http": "0.1.6",
     "underscore": "1.5.1",
     "watch": "0.8.0",
     "winston": "0.7.2",
