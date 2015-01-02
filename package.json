@@ -1,6 +1,6 @@
 {
   "name": "spas",
-  "version": "0.1.17",
+  "version": "0.1.18",
   "description": "spas is a pragmatic tool for bundling multiple API requests into a single request/response for the end user. spas throttles, caches, parses, filters, concatenates and minifies API responses. It serves them all up in one tidy little package resulting in fewer requests and smaller downloads.",
   "keywords": ["json", "api", "proxy", "cache", "mashup"],
   "homepage": "http://dtex.github.io/spas/",
