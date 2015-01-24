@@ -78,7 +78,7 @@ exports.sample = {
 <strong>resource:</strong> (object and method, required) &mdash; The method you wish to use to retrieve your data.<br/>
 <strong>params:</strong> (object, required) &mdash; Parameters object that is passed to resource method<br/>
 <strong>cacheduration:</strong> (seconds, optional, default: 3600) &mdash; Controls how long a request to an API will be cached by spas.<br/> 
-<strong>schedule:</strong> (string, optional) &mdash; In addition to building bundles on demand, spas can refresh bundles on a scheduled basis. The schedule string is a <a href="http://www.nncron.ru/help/EN/working/cron-format.htm">Cron formatted</a> string. Be mindful of rate limiting imposed by various providers when setting this up.<br/>
+<strong>schedule:</strong> (string, optional) &mdash; In addition to building bundles on demand, spas can refresh bundles on a scheduled basis. The schedule string is a <a href="https://github.com/ncb000gt/node-cron">Cron formatted</a> string. Be mindful of rate limiting imposed by various providers when setting this up.<br/>
 <strong>timeout:</strong> (milliseconds, optional, default: none) &mdash; Controls how long spas will wait for a request to an API before serving up the cached version, even if it has expired. When this happens spas will initiate an asynchronous request to update the bundle so it will be there next time.<br/>
 <strong>filter:</strong> (optional, default: none) &mdash; A map of the results object showing just the parts you want to keep.</br>
 <strong>cleanup:</strong> (optional, default: none) &mdash; A function that accepts one parameter (your filtered api response as json) and returns the same object. You can perform any manipulation you please on the API response before returning it.</p>
