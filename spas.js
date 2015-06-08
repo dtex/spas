@@ -39,24 +39,25 @@ GLOBAL.config = {};
 // ## Module dependencies.
 var
   // My lib files
-  configure = require('./lib/config')
-  , winston = require('./lib/logging').winston
-  , bundleManager = require('./lib/bundleManager')
-  , engine = require('./lib/engine')
-  , oauth = require('./lib/oauth')
-  , oauth2 = require('./lib/oauth2')
-  , keystone2 = require('./lib/keystone2')
-  
-  // Built in modules
-  , http = require('http')
-  , url = require('url')
-  , querystring = require('querystring')
-  , fs = require('fs')
-  , spawn = require('child_process').spawn
-  
-  // Other Dependencies
-  , director = require('director')
-  , _ = require('underscore')._
+  configure = require('./lib/config'),
+  winston = require('./lib/logging').winston,
+  bundleManager = require('./lib/bundleManager'),
+  engine = require('./lib/engine'),
+  oauth = require('./lib/oauth'),
+  oauth2 = require('./lib/oauth2'),
+  keystone2 = require('./lib/keystone2'),
+
+// Built in modules
+  http = require('http'),
+  url = require('url'),
+  querystring = require('querystring'),
+  fs = require('fs'),
+  spawn = require('child_process').spawn,
+
+// Other Dependencies
+  director = require('director'),
+  _ = require('underscore')._,
+  client = require("loggly")
 ;
 
 if (GLOBAL.config.args.create) {
@@ -72,7 +73,7 @@ if (GLOBAL.config.args.service) {
 	if (!fs.existsSync(process.cwd() + '/logs')) {
 		fs.mkdirSync(process.cwd() + '/logs');
 	}
-	
+
 
 	// Spawn the main SPAS application
 	var params = GLOBAL.config.isLocal ? ['spas'] : [];
@@ -98,8 +99,8 @@ if (GLOBAL.config.args.service) {
 		} else {
 			return false;
 		}
-	}
-	
+	};
+
 	// ## Our Routes
 	var router = new director.http.Router({
 
@@ -107,43 +108,43 @@ if (GLOBAL.config.args.service) {
 		'/oauth': {
 			get: function() {
 				var oauth_token = querystring.parse((url.parse(this.req.url).query)).oauth_token;
-				
+
 				//winston.info('oauth callback for ' + nonce + ' running');
 				winston.debug('Query parameters:' + JSON.stringify(querystring.parse((url.parse(this.req.url).query))));
-				
+
 				if (!_.isUndefined(oauth_token) && !_.isUndefined(this.req.headers.cookie)) {
-					
+
 					var self = this,
 						cookies = {},
 						tempCookies = this.req.headers.cookie.split(';');
-					
+
 					_.each(tempCookies, function(cookie, index) {
 						cookie = cookie.split('=');
 						cookies[cookie[0].trim()] = cookie[1].trim();
 					});
-					
+
 					var bidkey = GLOBAL.config.guids[cookies.authCode].split(',');
-					
+
 					var bid = bidkey[0],
 						key = bidkey[1];
 
 					oauth.saveOauthToken( GLOBAL.bundles[bid][key], querystring.parse((url.parse(this.req.url).query)).oauth_token, querystring.parse((url.parse(this.req.url).query)).oauth_verifier, bid, key, function( tout ) {
-	
+
 						if (_.has(tout, 'redirect')) {
 							self.res.statusCode = 302;
 							self.res.setHeader("Location", tout.redirect);
 							self.res.end();
-							
+
 						}
 					});
-					
+
 				} else {
-					
+
 					this.res.writeHead(404);
 					this.res.end();
-		
+
 				}
-				
+
 			}
 		},
 
@@ -172,7 +173,7 @@ if (GLOBAL.config.args.service) {
 	    		engine.fulfill ( this.res, this.req.headers['x-forwarded-for'] || this.req.connection.remoteAddress, bid, querystring.parse((url.parse(this.req.url).query)).callback, gzip );
 	    	}
 		},
-		
+
 		// A bundle is being requested in the format 'http://domain.com/bundlename'
 		'/:bid': {
 	    	get: function(bid) {
@@ -190,7 +191,7 @@ if (GLOBAL.config.args.service) {
 	    	}
 		}
 	});
-	
+
 	// ### Create our server
 	var server = http.createServer(function (req, res) {
 		router.dispatch(req, res, function (err) {
@@ -206,7 +207,7 @@ if (GLOBAL.config.args.service) {
 	//
 	var bundler = new bundleManager();
 	bundler.refreshBundles();
-	
+
 	server.listen(GLOBAL.config.port);
 	winston.info('Listening on port ' + GLOBAL.config.port);
 }
