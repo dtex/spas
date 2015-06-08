@@ -1,8 +1,14 @@
 {
   "name": "spas",
-  "version": "0.1.18",
+  "version": "0.1.19",
   "description": "spas is a pragmatic tool for bundling multiple API requests into a single request/response for the end user. spas throttles, caches, parses, filters, concatenates and minifies API responses. It serves them all up in one tidy little package resulting in fewer requests and smaller downloads.",
-  "keywords": ["json", "api", "proxy", "cache", "mashup"],
+  "keywords": [
+    "json",
+    "api",
+    "proxy",
+    "cache",
+    "mashup"
+  ],
   "homepage": "http://dtex.github.io/spas/",
   "license": "MIT",
   "author": {
@@ -17,28 +23,29 @@
     "type": "git",
     "url": "http://github.com/dtex/spas.git"
   },
-  "bin": { 
-  	"spas" : "./bin/spas"
+  "bin": {
+    "spas": "./bin/spas"
   },
   "dependencies": {
     "connect": "2.8.5",
     "cron": "1.0.1",
     "date-utils": "1.2.14",
     "director": "1.2.0",
+    "loggly": "^1.0.8",
     "nconf": "0.6.7",
     "neuron": "0.4.5",
     "node-uuid": "1.4.1",
     "oauth": "0.9.10",
+    "rackspace-openstack": "0.0.11",
     "redis": "0.8.4",
     "redis-rstream": "0.1.2",
     "request": "2.27.0",
     "spas-http": "0.1.6",
     "underscore": "1.5.1",
     "watch": "0.8.0",
-    "winston": "0.7.2",
-    "rackspace-openstack": "0.0.11"
+    "winston": "0.7.2"
   },
   "devDependencies": {
-	"vows": "0.7.0"  
+    "vows": "0.7.0"
   }
 }
