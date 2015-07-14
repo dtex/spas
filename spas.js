@@ -40,7 +40,7 @@ GLOBAL.config = {};
 var
   // My lib files
   configure = require('./lib/config'),
-  winston = require('./lib/logging').winston,
+  log = require('./lib/logging').log,
   bundleManager = require('./lib/bundleManager'),
   engine = require('./lib/engine'),
   oauth = require('./lib/oauth'),
@@ -109,8 +109,8 @@ if (GLOBAL.config.args.service) {
 			get: function() {
 				var oauth_token = querystring.parse((url.parse(this.req.url).query)).oauth_token;
 
-				//winston.info('oauth callback for ' + nonce + ' running');
-				winston.debug('Query parameters:' + JSON.stringify(querystring.parse((url.parse(this.req.url).query))));
+				//log.info('oauth callback for ' + nonce + ' running');
+				log.debug('Query parameters:' + JSON.stringify(querystring.parse((url.parse(this.req.url).query))));
 
 				if (!_.isUndefined(oauth_token) && !_.isUndefined(this.req.headers.cookie)) {
 
@@ -152,8 +152,8 @@ if (GLOBAL.config.args.service) {
 			get: function() {
 				var self = this;
 
-				winston.info('oauth2 callback reqeusted');
-				winston.debug(JSON.stringify(querystring.parse((url.parse(this.req.url).query))));
+				log.info('oauth2 callback reqeusted');
+				log.debug(JSON.stringify(querystring.parse((url.parse(this.req.url).query))));
 
 				oauth2.saveCode ( this.res, querystring.parse((url.parse(this.req.url).query)).state.split(','), querystring.parse((url.parse(this.req.url).query)).code, function( tout ) {
 					if (_.has(tout, 'redirect')) {
@@ -169,7 +169,7 @@ if (GLOBAL.config.args.service) {
 		'/bundle/:bid': {
 	    	get: function(bid) {
 	    		var gzip = acceptGZip(this.req.headers);
-	    		winston.error('Old style bundle request made for ' + bid);
+	    		log.error('Old style bundle request made for ' + bid);
 	    		engine.fulfill ( this.res, this.req.headers['x-forwarded-for'] || this.req.connection.remoteAddress, bid, querystring.parse((url.parse(this.req.url).query)).callback, gzip );
 	    	}
 		},
@@ -209,5 +209,5 @@ if (GLOBAL.config.args.service) {
 	bundler.refreshBundles();
 
 	server.listen(GLOBAL.config.port);
-	winston.info('Listening on port ' + GLOBAL.config.port);
+	log.info('Listening on port ' + GLOBAL.config.port);
 }
