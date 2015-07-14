@@ -27,6 +27,7 @@
     "spas": "./bin/spas"
   },
   "dependencies": {
+    "bunyan": "^1.4.0",
     "connect": "2.8.5",
     "cron": "1.0.1",
     "date-utils": "1.2.14",
@@ -42,8 +43,7 @@
     "request": "2.27.0",
     "spas-http": "0.1.6",
     "underscore": "1.5.1",
-    "watch": "0.8.0",
-    "winston": "0.7.2"
+    "watch": "0.8.0"
   },
   "devDependencies": {
     "vows": "0.7.0"
