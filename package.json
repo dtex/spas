@@ -26,6 +26,10 @@
   "bin": {
     "spas": "./bin/spas"
   },
+  "scripts": {
+    "start" : "node spas",
+    "test": "./node_modules/vows/bin/vows ./test/*.js"
+  },
   "dependencies": {
     "bunyan": "^1.4.0",
     "connect": "2.8.5",
