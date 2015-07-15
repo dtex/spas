@@ -27,16 +27,16 @@
     "spas": "./bin/spas"
   },
   "scripts": {
-    "start" : "node spas",
+    "start": "node spas",
     "test": "./node_modules/vows/bin/vows ./test/*.js"
   },
   "dependencies": {
     "bunyan": "^1.4.0",
+    "bunyan-loggly": "0.0.5",
     "connect": "2.8.5",
     "cron": "1.0.1",
     "date-utils": "1.2.14",
     "director": "1.2.0",
-    "loggly": "^1.0.8",
     "nconf": "0.6.7",
     "neuron": "0.4.5",
     "node-uuid": "1.4.1",

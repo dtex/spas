@@ -56,8 +56,7 @@ var
 
 // Other Dependencies
   director = require('director'),
-  _ = require('underscore')._,
-  client = require("loggly")
+  _ = require('underscore')._
 ;
 
 if (GLOBAL.config.args.create) {
