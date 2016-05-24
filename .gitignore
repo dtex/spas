@@ -14,7 +14,7 @@ node_modules
 bundles/
 bundles/*
 !bundles/sample.js
-
+.vscode/
 
 
 config.json
